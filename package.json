@@ -1,0 +1,29 @@
+{
+  "name": "webrtcn",
+  "version": "0.0.0",
+  "description": "a simple multi-party chatting application based on WebRTC",
+  "main": "server.js",
+  "dependencies": {
+    "socket.io": "~0.9.16",
+    "node-static": "~0.7.3",
+    "express": "~3.4.8"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "node server.js",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/movier/webrtcn"
+  },
+  "keywords": [
+    "WebRTC"
+  ],
+  "author": "Yang Xiao Ming",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/movier/webrtcn/issues"
+  },
+  "homepage": "https://github.com/movier/webrtcn"
+}
