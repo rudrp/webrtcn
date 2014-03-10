@@ -1,5 +1,5 @@
 /**
- * Created by August on 14-2-28.
+ * Created by Yang Xiao Ming on 14-2-28.
  */
 
 var localVideo, remote, remoteVideo, localStream, remoteStream;
@@ -105,8 +105,17 @@ socket.on('message', function (message){
     }
 });
 
+// Above is all about variables and socket.io
+// This part is something about the response of client to message from server
+/****************************************Divided******************************************************/
+// Below is all about functions
+
+// Initial
 initialize();
 
+/**
+ * Main entry function
+ */
 function initialize() {
     localVideo = document.getElementById("localVideo");
     remoteVideo = document.getElementById("remoteVideo");
@@ -114,6 +123,9 @@ function initialize() {
     doGetUserMedia();
 }
 
+/**
+ * Adapter.js is used to get user media
+ */
 function doGetUserMedia() {
     // Call into getUserMedia via the polyfill (adapter.js).
     try {
@@ -126,9 +138,13 @@ function doGetUserMedia() {
     }
 }
 
+/**
+ * If get user media is successful, this function will be called
+ *
+ * @param stream
+ */
 function onUserMediaSuccess(stream) {
     console.log("User has granted access to local media.");
-    //clientID.value = Math.round(Math.random()*10000);
     // Call the polyfill wrapper to attach the media stream to this element.
     attachMediaStream(localVideo, stream);
     localVideo.style.opacity = 1;
@@ -137,6 +153,8 @@ function onUserMediaSuccess(stream) {
         type: 'got user media',
         id: clientID.value
     });
+
+    // Each new comer except the creator will set up peerConnection and do some calling
     if(!isInitiator){
         for(var i=0;i<clientArray.length;i++){
             console.log(clientArray);
@@ -146,22 +164,29 @@ function onUserMediaSuccess(stream) {
     }
 }
 
+/**
+ * Set up RTCPeerConnection and do some calling
+ *
+ * @param calleeID
+ * @param i the number of peerConnection
+ */
 function maybeStart(calleeID, i) {
     if (typeof localStream != 'undefined' && isChannelReady) {
         createPeerConnection(i);
-        //pc = pc+i;
         pc[i].addStream(localStream);
         isStarted = true;
         if(calleeID!=clientID.value){
             // Caller initiates offer to peer.
-            console.log("call happened!");
-            console.log(calleeID);
-            console.log(clientID);
             doCall(calleeID, clientID.value, i);
         }
     }
 }
 
+/**
+ * The most important thing is to create peer connection between peers
+ *
+ * @param i
+ */
 function createPeerConnection(i) {
     var pc_config = {"iceServers": [{"url": "stun:stun.l.google.com:19302"}]};
     try {
@@ -203,6 +228,11 @@ function createPeerConnection(i) {
 //    }
 //}
 
+/**
+ * When remote stream is ready to add, the function is called
+ *
+ * @param event
+ */
 function handleRemoteStreamAdded(event) {
     console.log('Remote stream added.');
     //remoteVideo.src = window.URL.createObjectURL(event.stream);
@@ -214,6 +244,12 @@ function handleRemoteStreamAdded(event) {
     //remoteStream = event.stream;
 }
 
+/**
+ * When remote stream is removed, the function is called
+ * todo: remove the removed stream on other peer's screen
+ *
+ * @param event
+ */
 function handleRemoteStreamRemoved(event) {
     console.log('Remote stream removed. Event: ', event);
 }
@@ -241,6 +277,13 @@ function stop() {
 //    msgQueue.length = 0;
 }
 
+/**
+ * Main calling function
+ *
+ * @param calleeID
+ * @param callerID
+ * @param i
+ */
 function doCall(calleeID, callerID, i) {
     console.log('Sending offer to peer');
     pc[i].createOffer(
@@ -256,6 +299,13 @@ function doCall(calleeID, callerID, i) {
         }, handleCreateOfferError);
 }
 
+/**
+ * Main answering function
+ *
+ * @param calleeID
+ * @param callerID
+ * @param peerNum
+ */
 function doAnswer(calleeID, callerID, peerNum) {
     console.log('Sending answer to peer.');
     pc[peerNum].createAnswer(
