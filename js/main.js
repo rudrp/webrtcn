@@ -10,6 +10,7 @@ var isChannelReady = false;
 var clientArray = [];
 var pc = [];
 var clientID = document.getElementById("clientID");
+var localStreamID = document.getElementById("localStreamID");
 
 // Set up audio and video regardless of what devices are present.
 var sdpConstraints = {
@@ -101,7 +102,7 @@ socket.on('message', function (message){
         }
 
     } else if (message.type === 'bye') {
-        onRemoteHangup();
+        onRemoteHangup(message.streamID);
     }
 });
 
@@ -205,7 +206,15 @@ function createPeerConnection(i) {
                 console.log("End of candidates.");
             }
         };
-        pc[i].onaddstream = handleRemoteStreamAdded;
+        // When remote stream is ready to add, the function is called
+        pc[i].onaddstream = function(event){
+            console.log('Remote stream added.');
+            var remoteVideo = document.createElement('video');
+            remoteVideo.id = event.stream.id;
+            remoteVideo.src = window.URL.createObjectURL(event.stream);
+            remoteVideo.autoplay = "autoplay";
+            remote.appendChild(remoteVideo);
+        };
         pc[i].onremovestream = handleRemoteStreamRemoved;
         console.log("Created RTCPeerConnnection with config:\n" + "  \"" +
             JSON.stringify(pc_config) + "\".");
@@ -213,22 +222,6 @@ function createPeerConnection(i) {
         console.log("Failed to create PeerConnection, exception: " + e.message);
         alert("Cannot create RTCPeerConnection object; WebRTC is not supported by this browser.");
     }
-}
-
-/**
- * When remote stream is ready to add, the function is called
- *
- * @param event
- */
-function handleRemoteStreamAdded(event) {
-    console.log('Remote stream added.');
-    //remoteVideo.src = window.URL.createObjectURL(event.stream);
-    var remoteVideo = document.createElement('video');
-    remoteVideo.class = "remoteVideo";
-    remoteVideo.src = window.URL.createObjectURL(event.stream);
-    remoteVideo.autoplay = "autoplay";
-    remote.appendChild(remoteVideo);
-    //remoteStream = event.stream;
 }
 
 /**
@@ -244,16 +237,18 @@ function handleRemoteStreamRemoved(event) {
 // Send BYE on refreshing(or leaving) a demo page
 // to ensure the room is cleaned for next session.
 window.onbeforeunload = function() {
-    sendMessage({type: 'bye'});
+    sendMessage({
+        type: 'bye',
+        streamID:localStreamID.value
+    });
 }
 
-function onRemoteHangup() {
+function onRemoteHangup(streamID) {
     console.log('Session terminated.');
-    //isInitiator = false;
-    var remoteVideo = document.getElementById("remoteVideo");
+    var remoteVideo = document.getElementById(streamID);
     remoteVideo.parentNode.removeChild(remoteVideo);
 //    remoteVideo.src = '';
-    stop();
+    //stop();
 }
 
 function stop() {
@@ -282,6 +277,7 @@ function doCall(calleeID, callerID, i) {
         sessionDescription.peerNum = i;
         pc[i].setLocalDescription(sessionDescription);
         console.log('setLocalAndSendMessage sending message' , sessionDescription);
+        localStreamID.value = sessionDescription.sdp.match(/msid:(.*) /)[1];
         sendMessage(sessionDescription);
         }, handleCreateOfferError);
 }
@@ -304,6 +300,7 @@ function doAnswer(calleeID, callerID, peerNum) {
             sessionDescription.peerNum = peerNum;
             pc[peerNum].setLocalDescription(sessionDescription);
             console.log('setLocalAndSendMessage sending message' , sessionDescription);
+            localStreamID.value = sessionDescription.sdp.match(/msid:(.*) /)[1];
             sendMessage(sessionDescription);
         }, null, sdpConstraints);
 }
