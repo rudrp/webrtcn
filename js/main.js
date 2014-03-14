@@ -40,7 +40,6 @@ if (room !== '') {
 }
 
 socket.on('session', function(session){
-    //console.log('ssssssssssssssssssssssss'+session+'sssssssssssssssssssssssssssssssssss');
     clientArray = session;
 });
 
@@ -158,7 +157,6 @@ function onUserMediaSuccess(stream) {
     // Each new comer except the creator will set up peerConnection and do some calling
     if(!isInitiator){
         for(var i=0;i<clientArray.length;i++){
-            console.log(clientArray);
             // Caller creates PeerConnection.
             maybeStart(clientArray[i], i);
         }
@@ -239,6 +237,7 @@ function handleRemoteStreamRemoved(event) {
 window.onbeforeunload = function() {
     sendMessage({
         type: 'bye',
+        clientID:clientID.value,
         streamID:localStreamID.value
     });
 }

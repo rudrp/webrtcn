@@ -33,6 +33,14 @@ io.sockets.on('connection', function (socket) {
             io.sockets.socket(message.calleeID).emit('message', message);
         } else if (message.type==='answer'){
             io.sockets.socket(message.callerID).emit('message', message);
+        } else if (message.type==='bye'){
+            // delete the SocketID in our session array if the client is closed
+            for (var i = 0; i < session_array.length; i++) {
+                if (session_array[i] == message.clientID){
+                    session_array.splice(i,1);
+                }
+            }
+            socket.broadcast.emit('message', message);
         } else {
             // for a real app, would be room only (not broadcast)
             socket.broadcast.emit('message', message);
