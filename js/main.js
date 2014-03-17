@@ -22,16 +22,18 @@ var sdpConstraints = {
 
 var room = location.pathname.substring(1);
 if (room === '') {
-//  room = prompt('Enter room name:');
-    room = 'foo';
+    room = prompt('Enter room name:');
+    document.getElementById("header").innerHTML = "This is room " + room;
 } else {
-    //
+    room = 'foo';
 }
 
 var socket = io.connect();
 
 socket.on('connect', function () {
     clientID.value = this.socket.sessionid;
+    // Initial
+    initialize();
 });
 
 if (room !== '') {
@@ -110,8 +112,6 @@ socket.on('message', function (message){
 /****************************************Divided******************************************************/
 // Below is all about functions
 
-// Initial
-initialize();
 
 /**
  * Main entry function
@@ -157,8 +157,11 @@ function onUserMediaSuccess(stream) {
     // Each new comer except the creator will set up peerConnection and do some calling
     if(!isInitiator){
         for(var i=0;i<clientArray.length;i++){
-            // Caller creates PeerConnection.
-            maybeStart(clientArray[i], i);
+            // Only in this room's client should be called
+            if(clientArray[i].slice(20)==room){
+                // Caller creates PeerConnection.
+                maybeStart(clientArray[i].slice(0,20), i);
+            }
         }
     }
 }
@@ -238,7 +241,8 @@ window.onbeforeunload = function() {
     sendMessage({
         type: 'bye',
         clientID:clientID.value,
-        streamID:localStreamID.value
+        streamID:localStreamID.value,
+        room:room
     });
 }
 

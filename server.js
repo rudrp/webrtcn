@@ -16,7 +16,6 @@ var session_array = [];
 io.sockets.on('connection', function (socket) {
 
     socket.emit('session', session_array);
-    session_array.push(socket.id);
 
     // convenience function to log server messages on the client
     function log() {
@@ -36,11 +35,11 @@ io.sockets.on('connection', function (socket) {
         } else if (message.type==='bye'){
             // delete the SocketID in our session array if the client is closed
             for (var i = 0; i < session_array.length; i++) {
-                if (session_array[i] == message.clientID){
+                if (session_array[i].slice(0,20) == message.clientID){
                     session_array.splice(i,1);
                 }
             }
-            socket.broadcast.emit('message', message);
+            socket.broadcast.to(message.room).emit('message', message);
         } else {
             // for a real app, would be room only (not broadcast)
             socket.broadcast.emit('message', message);
@@ -49,6 +48,9 @@ io.sockets.on('connection', function (socket) {
 
     socket.on('create or join', function (room) {
         var numClients = io.sockets.clients(room).length;
+
+        // append room name to the session id so that client could find out which room the session belong to
+        session_array.push(socket.id+room);
 
         log('Room ' + room + ' has ' + numClients + ' client(s)');
         log('Request to create or join room ' + room);
@@ -60,7 +62,7 @@ io.sockets.on('connection', function (socket) {
             io.sockets.in(room).emit('join', room);
             socket.join(room);
             socket.emit('joined', room);
-        } else { // max two clients
+        } else {
             socket.emit('full', room);
         }
         socket.emit('emit(): client ' + socket.id + ' joined room ' + room);
