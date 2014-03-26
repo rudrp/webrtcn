@@ -254,13 +254,18 @@ function onRemoteHangup(streamID) {
     //stop();
 }
 
-function stop() {
-    isStarted = false;
-    pc.close();
-    pc = null;
-    remoteStream = null;
-//    msgQueue.length = 0;
+function pause_me_from_chatting(){
+    //alert(clientID.value+' '+localStreamID.value);
+    pc[0].removeStream(localStream);
 }
+
+//function stop() {
+//    isStarted = false;
+//    pc.close();
+//    pc = null;
+//    remoteStream = null;
+////    msgQueue.length = 0;
+//}
 
 /**
  * Main calling function
