@@ -257,6 +257,7 @@ function onRemoteHangup(streamID) {
 function pause_me_from_chatting(){
     //alert(clientID.value+' '+localStreamID.value);
     pc[0].removeStream(localStream);
+    localVideo.pause();
 }
 
 //function stop() {
