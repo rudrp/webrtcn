@@ -104,6 +104,8 @@ socket.on('message', function (message){
 
     } else if (message.type === 'bye') {
         onRemoteHangup(message.streamID);
+    } else if (message.type === 'pause') {
+        document.getElementById(message.pauseStreamID).pause();
     }
 });
 
@@ -254,10 +256,15 @@ function onRemoteHangup(streamID) {
     //stop();
 }
 
-function pause_me_from_chatting(){
-    //alert(clientID.value+' '+localStreamID.value);
-    pc[0].removeStream(localStream);
+function pause_me_from_chatting() {
+    //pc[0].removeStream(localStream);
     localVideo.pause();
+    sendMessage({
+       type: 'pause',
+       pauseStreamID: localStreamID.value
+    });
+//    alert('Ready to resume?');
+//    localVideo.play();
 }
 
 //function stop() {
