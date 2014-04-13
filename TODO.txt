@@ -4,3 +4,5 @@
             PeerConnection的参与是最好的
   
 2.封装webrtcn，使之成为一个javascript类，在git新的分支中展开这项工作
+
+3.nginx似乎不支持websocket，研究一下，可能需要使用其他signals
